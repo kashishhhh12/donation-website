@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Donation Campaign - Internship Project</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  /* Custom scrollbar styling for notification list and transaction table */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background-color: #868e96;
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-track {
+    background-color: #f1f5f9;
+  }
+
+  /* Progress bar animations */
+  .progress-bar {
+    transition: width 0.6s ease-in-out;
+  }
+</style>
+</head>
+
+<body class="bg-gray-50 min-h-screen flex flex-col">
+
+<header class="bg-gradient-to-r from-purple-600 to-indigo-600 shadow-lg p-5 text-white">
+  <div class="max-w-6xl mx-auto flex justify-between items-center">
+    <h1 class="text-2xl font-extrabold tracking-wide select-none cursor-default">ImpactBridge</h1>
+    <nav>
+      <ul class="flex gap-6 text-lg font-semibold">
+        <li><button data-page="landing" class="nav-btn hover:text-indigo-100">Home</button></li>
+        <li><button data-page="dashboard" class="nav-btn hover:text-indigo-100">Intern Dashboard</button></li>
+        <li><button data-page="leaderboard" class="nav-btn hover:text-indigo-100">Leaderboard</button></li>
+        <li><button data-page="rewards" class="nav-btn hover:text-indigo-100">Rewards</button></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main id="app" class="flex-grow max-w-6xl mx-auto px-4 py-8 w-full">
+
+<!-- Landing Page -->
+<section id="landing" class="page hidden max-w-4xl mx-auto text-center space-y-8">
+  <h2 class="text-4xl font-extrabold text-purple-700">Welcome to ImpactBridge</h2>
+  <p class="text-xl text-gray-700 max-w-xl mx-auto">
+    Bridging donors with meaningful campaigns. Together, we raise funds and support change.
+  </p>
+  <button id="join-us-btn" 
+          class="mt-6 px-8 py-3 bg-purple-600 text-white text-lg rounded-lg shadow-lg hover:bg-purple-700 transition duration-300">
+    Join Us
+  </button>
+
+  <div class="mt-12">
+    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/18cf2bcb-44a3-4997-9726-a7f6dacbcb57.png" 
+         alt="Diverse team collaborating enthusiastically on a community fundraising campaign in a modern office" 
+         class="mx-auto rounded-lg shadow-lg max-w-full" 
+         onerror="this.style.display='none';" />
+  </div>
+</section>
+
+<!-- Intern Dashboard Page -->
+<section id="dashboard" class="page hidden max-w-5xl mx-auto space-y-8">
+
+  <h2 class="text-3xl font-bold text-purple-700 mb-6 border-b border-purple-300 pb-2">Your Dashboard</h2>
+
+  <!-- Greeting -->
+  <div class="bg-white p-6 rounded-lg shadow space-y-2">
+    <h3 class="text-2xl font-semibold" id="greeting">Hello, Intern!</h3>
+    <p class="text-gray-600" id="total-donations-text">Total Donations Raised: ₹<span id="total-donations">0</span></p>
+  </div>
+
+  <!-- Referral Link -->
+  <div class="bg-white p-6 rounded-lg shadow flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div>
+      <h4 class="font-semibold text-lg text-purple-700">Your Referral Link:</h4>
+      <a href="#" id="referral-link" class="text-indigo-600 underline break-all" target="_blank" rel="noopener noreferrer">-</a>
+    </div>
+    <button id="copy-referral-btn" 
+            class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition" 
+            title="Copy referral link to clipboard">
+      Copy Link
+    </button>
+  </div>
+
+  <!-- Progress Bar -->
+  <div class="bg-white p-6 rounded-lg shadow space-y-3">
+    <h4 class="font-semibold text-lg text-purple-700">Progress to next milestone</h4>
+    <div class="w-full bg-gray-300 rounded-full h-6 overflow-hidden shadow-inner">
+      <div id="progress-bar" class="progress-bar h-6 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-full w-0"></div>
+    </div>
+    <p id="progress-text" class="text-gray-700 mt-1 font-medium"></p>
+    <div class="flex flex-wrap gap-4 mt-3" id="milestones-badges" aria-label="Milestone badges">
+      <!-- Badges dynamically generated here -->
+    </div>
+  </div>
+
+  <!-- Share WhatsApp -->
+  <div class="bg-white p-6 rounded-lg shadow text-center">
+    <button id="share-whatsapp-btn" 
+            class="px-6 py-3 text-white bg-green-600 rounded-lg font-semibold shadow hover:bg-green-700 transition">
+      Share on WhatsApp
+    </button>
+  </div>
+
+  <!-- Notifications -->
+  <div class="bg-white p-6 rounded-lg shadow max-h-52 overflow-y-auto">
+    <h4 class="font-semibold text-lg text-purple-700 mb-2">Notifications</h4>
+    <ul id="notifications-list" class="space-y-2 text-gray-700 text-sm font-medium" aria-label="Donation notifications">
+      <!-- Notifications appear here -->
+    </ul>
+  </div>
+
+  <!-- Donations Table -->
+  <div class="bg-white rounded-lg shadow overflow-auto">
+    <h4 class="font-semibold p-4 border-b border-gray-200 text-purple-700 text-lg">Recent Donations</h4>
+    <table class="min-w-full divide-y divide-gray-200 text-left text-sm font-medium">
+      <thead class="bg-purple-100 text-purple-800">
+        <tr>
+          <th scope="col" class="px-4 py-2">Donor Name</th>
+          <th scope="col" class="px-4 py-2">Amount (₹)</th>
+          <th scope="col" class="px-4 py-2">Date</th>
+        </tr>
+      </thead>
+      <tbody id="donations-table-body" class="divide-y divide-gray-100">
+        <!-- Donation rows inserted here -->
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- Leaderboard Page -->
+<section id="leaderboard" class="page hidden max-w-4xl mx-auto space-y-8">
+
+  <h2 class="text-3xl font-bold text-purple-700 mb-6 border-b border-purple-300 pb-2">Top 5 Interns Leaderboard</h2>
+
+  <ol class="list-decimal bg-white rounded-lg shadow p-6 space-y-4 text-gray-800 text-lg max-w-xl mx-auto">
+    <!-- Leaderboard Entries -->
+  </ol>
+
+</section>
+
+<!-- Rewards / Certificate Page -->
+<section id="rewards" class="page hidden max-w-4xl mx-auto">
+
+  <h2 class="text-3xl font-bold text-purple-700 mb-6 border-b border-purple-300 pb-2">Rewards & Certificates</h2>
+
+  <div class="bg-white rounded-lg shadow p-6 space-y-8 text-center">
+
+    <div>
+      <h3 class="text-xl font-semibold text-gray-800 mb-3">Certificate of Achievement</h3>
+      <div class="border-4 border-purple-600 p-8 max-w-xl mx-auto rounded shadow-lg select-none bg-gradient-to-tr from-purple-50 to-indigo-50">
+        <p class="text-xl italic mb-2">This certificate awarded to</p>
+        <p id="cert-name" class="font-extrabold text-purple-700 text-3xl mb-6">[Your Name]</p>
+        <p class="mb-3">For outstanding commitment and fundraising success in ImpactBridge Campaign.</p>
+        <p class="text-gray-500">Date: <span id="cert-date"></span></p>
+      </div>
+    </div>
+
+    <div class="space-y-4 max-w-xl mx-auto text-left text-gray-700">
+      <h3 class="text-lg font-semibold text-purple-700 mb-3">Rewards Preview</h3>
+      <ul class="list-disc pl-6 space-y-1">
+        <li>🎖️ Badge for reaching ₹500</li>
+        <li>🏅 Badge for reaching ₹1000</li>
+        <li>🏆 Badge for reaching ₹2000</li>
+        <li>Exclusive donor community access</li>
+        <li>Certificate of achievement</li>
+        <li>Opportunity to lead campaigns</li>
+      </ul>
+    </div>
+
+    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/cca129c9-7edc-4222-8bc1-b71b4598d01a.png" 
+         alt="A collection of digital medals and certificates arranged on a table with celebratory ribbons and medals" 
+         class="mx-auto rounded-lg shadow-lg max-w-full" 
+         onerror="this.style.display='none';" />
+  </div>
+
+</section>
+
+<footer class="bg-purple-700 text-white text-center p-4 mt-auto select-none">
+  <p>© 2025 ImpactBridge. All rights reserved.</p>
+</footer>
+
+<script>
+  // Intern State (simulate simple logged-in intern info on joining)
+  const intern = {
+    name: '',
+    referralCode: '',
+    totalDonations: 0,
+    donations: [],
+  };
+
+  // Milestones for badges
+  const milestones = [
+    {amount: 500, label: '₹500', icon: '🥉', description: 'Bronze Badge'},
+    {amount: 1000, label: '₹1000', icon: '🥈', description: 'Silver Badge'},
+    {amount: 2000, label: '₹2000', icon: '🥇', description: 'Gold Badge'},
+    {amount: 5000, label: '₹5000', icon: '🏆', description: 'Platinum Badge'},
+  ];
+
+  // Dummy leaderboard data
+  const leaderboardData = [
+    { name: "Ananya Sharma", donations: 7230 },
+    { name: "Rohan Gupta", donations: 5400 },
+    { name: "Sneha Patel", donations: 4690 },
+    { name: "Karan Singh", donations: 3850 },
+    { name: "Meera Joshi", donations: 2900 },
+  ];
+
+  // Generate a random referral code
+  function generateReferralCode() {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let code = '';
+    for(let i=0; i<8; i++) {
+      code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return code;
+  }
+
+  // Update greeting and referral link
+  function updateDashboardInfo() {
+    document.getElementById('greeting').textContent = `Hello, ${intern.name}!`;
+    intern.totalDonations = intern.donations.reduce((acc, d) => acc + d.amount, 0);
+    document.getElementById('total-donations').textContent = intern.totalDonations.toLocaleString('en-IN');
+
+    // Referral link example: dummy URL with referral param
+    const referralUrl = `https://impactbridge.example.com/donate?ref=${intern.referralCode}`;
+    const refLinkElem = document.getElementById('referral-link');
+    refLinkElem.href = referralUrl;
+    refLinkElem.textContent = referralUrl;
+
+    // Progress bar
+    updateProgressBar();
+
+    // Update badges
+    renderBadges();
+
+    // Update certificates page name
+    document.getElementById('cert-name').textContent = intern.name || '[Your Name]';
+
+    populateDonationsTable();
+    showNotifications();
+  }
+
+  // Update progress bar and text
+  function updateProgressBar() {
+    const nextMilestone = milestones.find(m => intern.totalDonations < m.amount);
+    const progressBar = document.getElementById('progress-bar');
+    const progressText = document.getElementById('progress-text');
+
+    if (!nextMilestone) {
+      progressBar.style.width = '100%';
+      progressText.textContent = `You have reached the highest milestone! Congratulations!`;
+      return;
+    }
+
+    const prevMilestoneAmount = Math.max(0, ...milestones.filter(m => m.amount < nextMilestone.amount).map(m => m.amount));
+    const range = nextMilestone.amount - prevMilestoneAmount;
+    const progressInRange = intern.totalDonations - prevMilestoneAmount;
+    const widthPercent = Math.min(100, Math.max(0, (progressInRange / range) * 100));
+
+    progressBar.style.width = widthPercent + '%';
+    progressText.textContent = `₹${intern.totalDonations.toLocaleString('en-IN')} / ₹${nextMilestone.amount.toLocaleString('en-IN')} (${widthPercent.toFixed(1)}%)`;
+  }
+
+  // Render milestone badges earned so far
+  function renderBadges() {
+    const container = document.getElementById('milestones-badges');
+    container.innerHTML = '';
+    milestones.forEach(m => {
+      const achieved = intern.totalDonations >= m.amount;
+      const bgColor = achieved ? 'bg-gradient-to-tr from-yellow-400 to-yellow-300 text-yellow-900' : 'bg-gray-200 text-gray-400';
+      const badge = document.createElement('div');
+      badge.className = `flex items-center gap-2 px-3 py-1 rounded-full font-semibold shadow cursor-default select-none ${bgColor}`;
+      badge.title = m.description + (achieved ? ' (Achieved)' : ' (Not achieved)');
+      badge.setAttribute('aria-label', m.description + (achieved ? '. Achieved.' : '. Not achieved.'));
+      badge.innerHTML = `<span class="text-2xl">${m.icon}</span> <span>${m.label}</span>`;
+      container.appendChild(badge);
+    });
+  }
+
+  // Simulated notifications - new donations coming every 15s (demo)
+  let notificationsQueue = [];
+  let notificationsTimeout = null;
+
+  const sampleDonors = ["Rahul", "Neha", "Amit", "Priya", "Vikram", "Simran", "Kavita", "Deepak", "Anil", "Sunita"];
+
+  function simulateDonation() {
+    if (!intern.referralCode) return; // no intern joined yet
+
+    // Simulate a new donation
+    const donor = sampleDonors[Math.floor(Math.random() * sampleDonors.length)];
+    const amount = Math.floor(Math.random() * 800) + 100;
+    const date = new Date();
+    const donation = { donorName: donor, amount, date };
+
+    // Add to donations list
+    intern.donations.push(donation);
+    intern.totalDonations += amount;
+
+    // Add to notifications queue
+    const message = `New donation of ₹${amount.toLocaleString('en-IN')} from ${donor}`;
+    notificationsQueue.unshift({ id: Date.now(), message});
+    if (notificationsQueue.length > 5) notificationsQueue.pop();
+
+    updateDashboardInfo();
+  }
+
+  // Display notifications helper
+  function showNotifications() {
+    const list = document.getElementById('notifications-list');
+    list.innerHTML = '';
+    notificationsQueue.forEach(n => {
+      const li = document.createElement('li');
+      li.className = 'bg-purple-100 border-l-4 border-purple-600 p-2 rounded shadow-sm';
+      li.textContent = n.message;
+      list.appendChild(li);
+    });
+  }
+
+  // Donations table population
+  function populateDonationsTable() {
+    const tbody = document.getElementById('donations-table-body');
+    tbody.innerHTML = '';
+    // Show latest 10 donations, reverse chronological order
+    const latestDonations = intern.donations.slice(-10).reverse();
+    if (latestDonations.length === 0) {
+      const tr = document.createElement('tr');
+      const td = document.createElement('td');
+      td.colSpan = 3;
+      td.className = 'text-center text-gray-500 p-4';
+      td.textContent = 'No donations yet.';
+      tr.appendChild(td);
+      tbody.appendChild(tr);
+      return;
+    }
+    latestDonations.forEach(d => {
+      const tr = document.createElement('tr');
+      const donorName = d.donorName || 'Anonymous';
+      tr.innerHTML = `
+        <td class="px-4 py-2">${donorName}</td>
+        <td class="px-4 py-2">₹${d.amount.toLocaleString('en-IN')}</td>
+        <td class="px-4 py-2">${d.date.toLocaleDateString('en-IN')}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  // Leaderboard page render
+  function renderLeaderboard() {
+    const ol = document.querySelector('#leaderboard ol');
+    ol.innerHTML = '';
+    leaderboardData.forEach((entry, i) => {
+      const li = document.createElement('li');
+      li.className = 'bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg p-4 shadow-lg flex justify-between items-center';
+      li.innerHTML = `
+        <span class="font-semibold text-purple-700 text-lg">${entry.name}</span>
+        <span class="font-bold text-indigo-600 text-xl">₹${entry.donations.toLocaleString('en-IN')}</span>
+      `;
+      ol.appendChild(li);
+    });
+  }
+
+  // Navigation handler
+  function showPage(pageId) {
+    document.querySelectorAll('.page').forEach(p => {
+      if (p.id === pageId) {
+        p.classList.remove('hidden');
+      } else {
+        p.classList.add('hidden');
+      }
+    });
+
+    // Highlight nav button active state
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+      btn.classList.toggle('underline decoration-2 decoration-white', btn.dataset.page === pageId);
+    });
+
+    // Special rendering on some pages
+    if (pageId === 'leaderboard') {
+      renderLeaderboard();
+    }
+  }
+
+  // Join Us button handler
+  document.getElementById('join-us-btn').addEventListener('click', () => {
+    let name = prompt('Enter your full name to join ImpactBridge:');
+    if (!name || name.trim().length < 3) {
+      alert('Please enter a valid name with at least 3 characters.');
+      return;
+    }
+    intern.name = name.trim();
+    intern.referralCode = generateReferralCode();
+    intern.donations = [];
+    intern.totalDonations = 0;
+
+    notificationsQueue = [];
+    updateDashboardInfo();
+    showPage('dashboard');
+
+    alert(`Welcome, ${intern.name}! Your referral code is ${intern.referralCode}. Start sharing your referral link!`);
+  });
+
+  // Copy referral link button
+  document.getElementById('copy-referral-btn').addEventListener('click', () => {
+    const link = document.getElementById('referral-link').textContent;
+    navigator.clipboard.writeText(link).then(() => {
+      alert('Referral link copied to clipboard!');
+    }).catch(() => {
+      alert('Failed to copy referral link. Please copy manually.');
+    });
+  });
+
+  // Share on WhatsApp button
+  document.getElementById('share-whatsapp-btn').addEventListener('click', () => {
+    const referralUrl = document.getElementById('referral-link').textContent;
+    const text = encodeURIComponent(`Support this impactful campaign! Donate using my referral link: ${referralUrl}`);
+    const whatsappUrl = `https://api.whatsapp.com/send?text=${text}`;
+    window.open(whatsappUrl, '_blank', 'noopener');
+  });
+
+  // Navigation buttons event listeners
+  document.querySelectorAll('.nav-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (btn.dataset.page === 'dashboard' && !intern.referralCode) {
+        alert('Please join first by clicking the "Join Us" button on Home page.');
+        showPage('landing');
+        return;
+      }
+      showPage(btn.dataset.page);
+    });
+  });
+
+  // Initialize app landing page shown
+  showPage('landing');
+
+  // Update current date on certificate page
+  document.getElementById('cert-date').textContent = new Date().toLocaleDateString('en-IN');
+
+  // Simulate donations every 15 seconds AFTER user joins
+  setInterval(() => {
+    if (intern.referralCode) {
+      simulateDonation();
+    }
+  }, 15000);
+
+</script>
+
+</body>
+</html>
+
